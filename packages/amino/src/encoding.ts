@@ -10,6 +10,8 @@ import {
   Pubkey,
   pubkeyType,
   Secp256k1Pubkey,
+  EthSecp256k1Pubkey,
+  isEthSecp256k1Pubkey
 } from "./pubkeys";
 
 export function encodeSecp256k1Pubkey(pubkey: Uint8Array): Secp256k1Pubkey {
@@ -21,6 +23,17 @@ export function encodeSecp256k1Pubkey(pubkey: Uint8Array): Secp256k1Pubkey {
     value: toBase64(pubkey),
   };
 }
+
+export function ethEncodeSecp256k1Pubkey(pubkey: Uint8Array): EthSecp256k1Pubkey {
+  if (pubkey.length !== 33 || (pubkey[0] !== 0x02 && pubkey[0] !== 0x03)) {
+    throw new Error("Public key must be compressed secp256k1, i.e. 33 bytes starting with 0x02 or 0x03");
+  }
+  return {
+    type: pubkeyType.ethSecp256k1,
+    value: toBase64(pubkey),
+  };
+}
+
 
 // As discussed in https://github.com/binance-chain/javascript-sdk/issues/163
 // Prefixes listed here: https://github.com/tendermint/tendermint/blob/d419fffe18531317c28c29a292ad7d253f6cafdf/docs/spec/blockchain/encoding.md#public-key-cryptography
@@ -187,6 +200,8 @@ export function encodeAminoPubkey(pubkey: Pubkey): Uint8Array {
   } else if (isEd25519Pubkey(pubkey)) {
     return new Uint8Array([...pubkeyAminoPrefixEd25519, ...fromBase64(pubkey.value)]);
   } else if (isSecp256k1Pubkey(pubkey)) {
+    return new Uint8Array([...pubkeyAminoPrefixSecp256k1, ...fromBase64(pubkey.value)]);
+  } else if (isEthSecp256k1Pubkey(pubkey)) {
     return new Uint8Array([...pubkeyAminoPrefixSecp256k1, ...fromBase64(pubkey.value)]);
   } else {
     throw new Error("Unsupported pubkey type");

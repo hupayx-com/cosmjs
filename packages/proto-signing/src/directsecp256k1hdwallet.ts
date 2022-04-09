@@ -1,4 +1,5 @@
-import { encodeSecp256k1Signature, makeCosmoshubPath, rawSecp256k1PubkeyToRawAddress } from "@cosmjs/amino";
+import { encodeSecp256k1Signature, encodeEthSecp256k1Signature, makeCosmoshubPath, rawSecp256k1PubkeyToRawAddress } from "@cosmjs/amino";
+// encodeEthSecp256k1Signature, 
 import {
   Bip39,
   EnglishMnemonic,
@@ -284,13 +285,13 @@ export class DirectSecp256k1HdWallet implements OfflineDirectSigner {
             const hashedMessage = new Keccak256(signBytes).digest()
             const signature = await Secp256k1.createSignature(hashedMessage, privkey);
             const signatureBytes = new Uint8Array([...signature.r(32), ...signature.s(32)]);
-            const stdSignature = encodeSecp256k1Signature(pubkey, signatureBytes);
-            let newStdsignature = stdSignature
-            newStdsignature.pub_key.type = urlType
+            const stdSignature = encodeEthSecp256k1Signature(pubkey, signatureBytes);
+            // let newStdsignature = stdSignature
+            // newStdsignature.pub_key.type = urlType
 
             return {
               signed: signDoc,
-              signature: newStdsignature
+              signature: stdSignature
             };
         }
         default: {
